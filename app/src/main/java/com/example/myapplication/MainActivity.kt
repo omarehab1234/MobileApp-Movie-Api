@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +28,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.FontScaling
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.lazy.items
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,44 +72,65 @@ fun Greeting(name: String) {
     LazyColumn(
         modifier = Modifier
             .background(Color.Black)
-            .width(500.dp)
-            .height(400.dp)
+            .fillMaxSize()
+
     ) {
         if (movies != null) {
+            items(movies!!.results) { movie ->
 
-            for (movie in movies!!.results) {
-                item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF1E1E1E)
+                    ),
+                    elevation = CardDefaults.cardElevation(8.dp)
+                ) {
+
+                    Column(
+                        modifier = Modifier.padding(16.dp)
                     ) {
 
-//                Image(
-//                    painter = painterResource(id = R.drawable.background),
-//                    contentDescription = null
-//                )
+                        Text(
+                            text = movie.title,
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        )
 
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Hello $name!",
-                                color = Color.White,
-                                modifier = Modifier.padding(16.dp)
-                            )
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                            Button(
-                                onClick = { count++ }
-                            ) {
-                                Text("Clicked $count times")
-                            }
-                        }
+                        Text(
+                            text = "⭐ ${movie.vote_average}",
+                            color = Color.Yellow,
+                            fontSize = 16.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Release: ${movie.release_date}",
+                            color = Color.LightGray,
+                            fontSize = 14.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(
+                            text = movie.overview,
+                            color = Color.White,
+                            maxLines = 4,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }
         }
     }
 }
+
 
 
 @Preview(showBackground = true)
