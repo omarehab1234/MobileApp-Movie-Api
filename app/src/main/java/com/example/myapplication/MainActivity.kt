@@ -3,7 +3,9 @@ package com.example.myapplication
 import com.example.myapplication.Api.ApiKeyy
 import com.example.myapplication.models.MovieResponse
 import com.example.myapplication.Api.RetrofitInstance
+import com.example.myapplication.Views.MovieScreen
 import android.os.Bundle
+import android.text.Layout
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -41,6 +43,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.draw.alpha
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import android.util.Log
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,95 +56,84 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            MyApplicationTheme {
-                Greeting("Omar")
-            }
-        }
-    }
-}
+            val navController = rememberNavController()
+            NavHost(
+                navController = navController,
+                startDestination = "home"
+            ) {
+                composable("home") {
+                    HomeScreen(navController)
+                }
 
-@Composable
-fun Greeting(name: String) {
 
-    var movies by remember {
-        mutableStateOf<MovieResponse?>(null)
-    }
-    LaunchedEffect(Unit){
-        movies = RetrofitInstance.api.getPopularMovies(ApiKeyy.api_key)
-    }
+                composable("moviesPopular") {
+                    moviePopularScreen(navController)
+                }
 
-    var count by remember {
-        mutableStateOf(0)
-    }
-
-    LazyColumn(
-        modifier = Modifier
-            .background(Color.Black)
-            .fillMaxSize()
-
-    ) {
-        if (movies != null) {
-            items(movies!!.results) { movie ->
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF1E1E1E)
-                    ),
-                    elevation = CardDefaults.cardElevation(8.dp)
-                ) {
-
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-
-                        Text(
-                            text = movie.title,
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = "⭐ ${movie.vote_average}",
-                            color = Color.Yellow,
-                            fontSize = 16.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = "Release: ${movie.release_date}",
-                            color = Color.LightGray,
-                            fontSize = 14.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Text(
-                            text = movie.overview,
-                            color = Color.White,
-                            maxLines = 4,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                composable("moviesFavorite") {
+                    movieFavoriteScreen(navController)
                 }
             }
         }
     }
-}
 
+    @Composable
+    fun movieFavoriteScreen(navController: NavController) {
+        var movies by remember { mutableStateOf<MovieResponse?>(null) }
 
+        LaunchedEffect(Unit) {
+            movies = RetrofitInstance.api.getFavoriteMovies(
+                23522945,
+                "Bearer ${ApiKeyy.token}"
+            )
+        }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MyApplicationTheme {
-        Greeting("Omar")
+        if(movies != null){
+            MovieScreen.movieScreen(movies!!,navController)
+        }
+    }
+
+    @Composable
+    fun moviePopularScreen(navController: NavController) {
+        var movies by remember {
+            mutableStateOf<MovieResponse?>(null)
+        }
+
+        LaunchedEffect(Unit) {
+            movies = RetrofitInstance.api.getPopularMovies(ApiKeyy.api_key)
+        }
+        if (movies != null) {
+            MovieScreen.movieScreen(movies!!, navController)
+        }
+    }
+
+    @Composable
+    fun HomeScreen(navController: NavController) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+                .background(Color.Black)
+        ) {
+            Box(
+                modifier = Modifier
+
+                ) {
+                Button(onClick = { navController.navigate("moviesPopular") }) {
+                    Text(
+                        text = "Get popular Movies"
+                    )
+                }
+
+            }
+            Button(onClick = { navController.navigate("moviesFavorite") }) {
+                Text(
+                    text = "Get Favorite Movies"
+                )
+            }
+
+        }
+
     }
 }
+
+
+
