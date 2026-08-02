@@ -73,6 +73,10 @@ class MainActivity : ComponentActivity() {
                 composable("moviesFavorite") {
                     movieFavoriteScreen(navController)
                 }
+
+                composale("movieDetail"){
+                    MovieSreen.movieDetail(navController)
+                }
             }
         }
     }
@@ -109,28 +113,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun HomeScreen(navController: NavController) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-                .background(Color.Black)
-        ) {
-            Box(
-                modifier = Modifier
-
-                ) {
-                Button(onClick = { navController.navigate("moviesPopular") }) {
-                    Text(
-                        text = "Get popular Movies"
-                    )
-                }
-
-            }
-            Button(onClick = { navController.navigate("moviesFavorite") }) {
-                Text(
-                    text = "Get Favorite Movies"
-                )
-            }
-
-        }
+        moviePopularScreen(navController)
 
     }
 }

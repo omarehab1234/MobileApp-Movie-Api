@@ -47,6 +47,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
+
 class MovieScreen{
 
     companion object {
@@ -75,7 +76,14 @@ class MovieScreen{
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(12.dp),
+                                    .padding(12.dp)
+                                    .clickable{
+                                        navController
+                                            .currentBackStackEntry?
+                                            .savedStateHandle
+
+                                        navController.navigate("movieDetail")
+                                    },
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
                                     containerColor = Color(0xFF1E1E1E)
@@ -121,5 +129,124 @@ class MovieScreen{
                 }
             }
         }
+
+        @Composable
+        fun movieDetails(navController: NavController){
+            val movie = navController
+                .previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<Movie>("movie")
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+                    .verticalScroll(rememberScrollState())
+            ) {
+
+                // Back button
+                Button(
+                    onClick = {
+                        navController.popBackStack()
+                    },
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text("<")
+                }
+
+
+                // Movie poster
+                if (movie != null) {
+                    AsyncImage(
+                        model = "https://image.tmdb.org/t/p/w500${movie.poster_path}",
+                        contentDescription = movie.title,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(450.dp),
+                        contentScale = ContentScale.Crop
+                    )
+
+
+                    Column(
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+
+                        // Title
+                        Text(
+                            text = movie.title,
+                            color = Color.White,
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+
+                        // Rating + Release date row
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color(0xFFFFC107)
+                                ),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    text = "⭐ ${movie.vote_average}",
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
+
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+
+                            Text(
+                                text = movie.release_date,
+                                color = Color.LightGray,
+                                fontSize = 16.sp
+                            )
+                        }
+
+
+                        Spacer(modifier = Modifier.height(25.dp))
+
+
+                        // Overview title
+                        Text(
+                            text = "Overview",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+
+                        // Description
+                        Text(
+                            text = movie.overview,
+                            color = Color.LightGray,
+                            fontSize = 16.sp,
+                            lineHeight = 24.sp
+                        )
+                    }
+                }
+            }
+        }
+
     }
+
+
+
+
+
+
+
+
 }
