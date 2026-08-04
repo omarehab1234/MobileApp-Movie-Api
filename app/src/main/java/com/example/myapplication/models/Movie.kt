@@ -1,12 +1,22 @@
 package com.example.myapplication.models
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-@Parcelize
-data class Movie (val id: Int,
-                  val title: String,
-                  val overview: String,
-                  val poster_path: String,
-                  val vote_average: Double,
-                  val release_date: String
-):Parcelable
+@Entity("movies")
+data class Movie (
+    @PrimaryKey
+    val id: Int,
+
+    val title: String,
+
+    val overview: String,
+
+    val poster_path: String,
+
+    val vote_average: Double,
+
+    val release_date: String,
+
+    var fav: Boolean = false,
+)
+

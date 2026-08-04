@@ -4,6 +4,7 @@ import com.example.myapplication.Api.ApiKeyy
 import com.example.myapplication.models.MovieResponse
 import com.example.myapplication.Api.RetrofitInstance
 import com.example.myapplication.Views.MovieScreen
+import com.example.myapplication.models.Movie
 import android.os.Bundle
 import android.text.Layout
 import androidx.activity.ComponentActivity
@@ -49,10 +50,22 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import android.util.Log
+import androidx.lifecycle.ViewModel
+import com.google.gson.Gson
+import androidx.room.Room
+import com.example.myapplication.DB.Database
+import com.example.myapplication.DB.MovieDao
+import kotlin.jvm.java
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val db = Room.databaseBuilder(
+            applicationContext,
+            Database::class.java,
+            "my_database"
+        ).build()
+        val movieDao = db.movieDao()
         enableEdgeToEdge()
 
         setContent {
@@ -71,34 +84,39 @@ class MainActivity : ComponentActivity() {
                 }
 
                 composable("moviesFavorite") {
-                    movieFavoriteScreen(navController)
+                    movieFavoriteScreen(navController,movieDao)
                 }
 
-                composale("movieDetail"){
-                    MovieSreen.movieDetail(navController)
+                composable("movieDetail/{json}") { backStackEntry ->
+
+                    val json = backStackEntry.arguments?.getString("json") ?: return@composable
+
+                    val movie = Gson().fromJson(json, Movie::class.java)
+
+                    MovieScreen.movieDetails(movie, navController,movieDao)
+                }
+
                 }
             }
         }
     }
 
     @Composable
-    fun movieFavoriteScreen(navController: NavController) {
-        var movies by remember { mutableStateOf<MovieResponse?>(null) }
+    fun movieFavoriteScreen(navController: NavController,movieDao: MovieDao) {
+        var movies:List<Movie>?  by remember { mutableStateOf(null) }
 
         LaunchedEffect(Unit) {
-            movies = RetrofitInstance.api.getFavoriteMovies(
-                23522945,
-                "Bearer ${ApiKeyy.token}"
-            )
+            movies = movieDao.getAllMovies()
         }
 
         if(movies != null){
-            MovieScreen.movieScreen(movies!!,navController)
+            MovieScreen.favScreen(movies!!,navController)
         }
     }
 
     @Composable
     fun moviePopularScreen(navController: NavController) {
+
         var movies by remember {
             mutableStateOf<MovieResponse?>(null)
         }
@@ -116,7 +134,7 @@ class MainActivity : ComponentActivity() {
         moviePopularScreen(navController)
 
     }
-}
+
 
 
 

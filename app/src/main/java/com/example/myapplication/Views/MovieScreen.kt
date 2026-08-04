@@ -46,8 +46,22 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
-
+import androidx.compose.foundation.clickable
+import com.example.myapplication.models.Movie
+import com.google.gson.Gson
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.layout.Row
+import android.net.Uri
+import android.view.CollapsibleActionView
+import androidx.compose.foundation.lazy.rememberLazyListState
+import coil.compose.AsyncImage
+import com.example.myapplication.DB.MovieDao
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import androidx.compose.material3.ButtonDefaults
 class MovieScreen{
 
     companion object {
@@ -59,15 +73,17 @@ class MovieScreen{
                     .background(Color.Black)
             ) {
 
-                Button(
-                    onClick = {
-                        navController.popBackStack() // Go back to previous screen
-                    },
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text("<")
-                }
+                Text(
+                    text = "\n"
+                )
+                Button(onClick = {
+                    navController.navigate("moviesFavorite")
+                },
 
+                    modifier = Modifier.padding(16.dp))
+                {Text(
+                    text = "Your Favorite movie"
+                ) }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -77,12 +93,9 @@ class MovieScreen{
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(12.dp)
-                                    .clickable{
-                                        navController
-                                            .currentBackStackEntry?
-                                            .savedStateHandle
-
-                                        navController.navigate("movieDetail")
+                                    .clickable {
+                                        val json = Uri.encode(Gson().toJson(movie))
+                                        navController.navigate("movieDetail/$json")
                                     },
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
@@ -93,6 +106,16 @@ class MovieScreen{
                                 Column(
                                     modifier = Modifier.padding(16.dp)
                                 ) {
+                                    AsyncImage(
+                                        model = "https://image.tmdb.org/t/p/w500${movie.poster_path}",
+                                        contentDescription = movie.title,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(300.dp),
+
+                                        contentScale = ContentScale.Crop
+                                    )
+
                                     Text(
                                         text = movie.title,
                                         color = Color.White,
@@ -131,19 +154,182 @@ class MovieScreen{
         }
 
         @Composable
-        fun movieDetails(navController: NavController){
-            val movie = navController
-                .previousBackStackEntry
-                ?.savedStateHandle
-                ?.get<Movie>("movie")
+        fun movieDetails(
+            movie: Movie,
+            navController: NavController,
+            movieDao: MovieDao
+        ) {
+            val listState = rememberLazyListState()
+
+            val imageHeight = (450 - listState.firstVisibleItemScrollOffset / 4)
+                .coerceAtLeast(0)
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+            ) {
+
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+
+                    item {
+                        AsyncImage(
+                            model = "https://image.tmdb.org/t/p/w500${movie.poster_path}",
+                            contentDescription = movie.title,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(imageHeight.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+
+                    item {
+                        Column(
+                            modifier = Modifier.padding(20.dp)
+                        ) {
+
+                            Text(
+                                text = movie.title,
+                                color = Color.White,
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+
+                                Card(
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color(0xFFFFC107)
+                                    )
+                                ) {
+                                    Text(
+                                        text = "⭐ ${movie.vote_average}",
+                                        modifier = Modifier.padding(8.dp)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(16.dp))
+
+                                Text(
+                                    text = movie.release_date,
+                                    color = Color.LightGray
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            Text(
+                                text = "Overview",
+                                color = Color.White,
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = movie.overview,
+                                color = Color.LightGray,
+                                lineHeight = 24.sp
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            favButton(movie, movieDao)
+
+                            Spacer(modifier = Modifier.height(100.dp))
+                        }
+                    }
+                }
+
+                Button(
+                    onClick = { navController.popBackStack() },
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text("<")
+                }
+            }
+        }
+
+        @Composable
+        fun favButton(movie: Movie , movieDao: MovieDao){
+            if(!movie.fav) {
+                Button(
+                    onClick = {
+                        movie.fav = true
+                        CoroutineScope(Dispatchers.IO).launch {
+                            movieDao.insertMovie(movie)
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .height(52.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFE53935), // Red
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 6.dp
+                    )
+                ) {
+                    Text(
+                        text = "❤️ Add to Favorites",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+            else{
+                Button(
+                    onClick = {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            movieDao.deleteMovie(movie)
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .height(52.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFE53935), // Red
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 6.dp
+                    )
+                ) {
+                    Text(
+                        text = "Remove from Favorites",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+
+
+        @Composable
+        fun favScreen(movies: List<Movie>, navController: NavController) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black)
-                    .verticalScroll(rememberScrollState())
             ) {
 
-                // Back button
+                Text(
+                    text = "\n"
+                )
+
                 Button(
                     onClick = {
                         navController.popBackStack()
@@ -152,93 +338,76 @@ class MovieScreen{
                 ) {
                     Text("<")
                 }
-
-
-                // Movie poster
-                if (movie != null) {
-                    AsyncImage(
-                        model = "https://image.tmdb.org/t/p/w500${movie.poster_path}",
-                        contentDescription = movie.title,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(450.dp),
-                        contentScale = ContentScale.Crop
-                    )
-
-
-                    Column(
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-
-                        // Title
-                        Text(
-                            text = movie.title,
-                            color = Color.White,
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-
-                        // Rating + Release date row
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    movies?.let {
+                        items(movies) { movie ->
                             Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp)
+                                    .clickable {
+                                        val json = Uri.encode(Gson().toJson(movie))
+                                        navController.navigate("movieDetail/$json")
+                                    },
+                                shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = Color(0xFFFFC107)
+                                    containerColor = Color(0xFF1E1E1E)
                                 ),
-                                shape = RoundedCornerShape(8.dp)
+                                elevation = CardDefaults.cardElevation(8.dp)
                             ) {
-                                Text(
-                                    text = "⭐ ${movie.vote_average}",
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(8.dp)
-                                )
+                                Column(
+                                    modifier = Modifier.padding(16.dp)
+                                ) {
+                                    AsyncImage(
+                                        model = "https://image.tmdb.org/t/p/w500${movie.poster_path}",
+                                        contentDescription = movie.title,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(300.dp),
+
+                                        contentScale = ContentScale.Crop
+                                    )
+
+                                    Text(
+                                        text = movie.title,
+                                        color = Color.White,
+                                        fontSize = 22.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    Text(
+                                        text = "⭐ ${movie.vote_average}",
+                                        color = Color.Yellow
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    Text(
+                                        text = "Release: ${movie.release_date}",
+                                        color = Color.LightGray
+                                    )
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    Text(
+                                        text = movie.overview,
+                                        color = Color.White,
+                                        maxLines = 4,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                             }
-
-
-                            Spacer(modifier = Modifier.width(16.dp))
-
-
-                            Text(
-                                text = movie.release_date,
-                                color = Color.LightGray,
-                                fontSize = 16.sp
-                            )
                         }
-
-
-                        Spacer(modifier = Modifier.height(25.dp))
-
-
-                        // Overview title
-                        Text(
-                            text = "Overview",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-
-                        // Description
-                        Text(
-                            text = movie.overview,
-                            color = Color.LightGray,
-                            fontSize = 16.sp,
-                            lineHeight = 24.sp
-                        )
                     }
                 }
             }
         }
+
+
 
     }
 
