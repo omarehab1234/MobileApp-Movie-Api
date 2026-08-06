@@ -1,6 +1,11 @@
-package com.example.myapplication.DB
+package com.example.myapplication.data.db
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import com.example.myapplication.models.Movie
 
 @Dao
@@ -21,8 +26,6 @@ interface MovieDao{
     @Query("select * from movies")
     suspend fun getAllMovies(): List<Movie>
 
-//    @Query("Select 1 from movies where  id = movie.id ")
-//    suspend fun getExitMovie(movie: Movie){
-//
-//    }
+    @Query("SELECT * FROM movies WHERE id = :movieId")
+    suspend fun getMovie(movieId : Int): Movie?
 }

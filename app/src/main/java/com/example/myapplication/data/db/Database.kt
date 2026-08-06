@@ -1,4 +1,5 @@
-package com.example.myapplication.DB
+package com.example.myapplication.data.db
+
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.example.myapplication.models.Movie
@@ -8,6 +9,6 @@ import com.example.myapplication.models.Movie
     version = 3
 )
 
-abstract class Database:RoomDatabase(){
-    abstract fun movieDao():MovieDao
+abstract class Database: RoomDatabase(){
+    abstract fun movieDao(): MovieDao
 }

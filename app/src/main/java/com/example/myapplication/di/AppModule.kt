@@ -1,8 +1,7 @@
 package com.example.myapplication.di
 
 import com.example.myapplication.Api.ApiService
-import com.example.myapplication.Api.RetrofitInstance
-import com.example.myapplication.DB.Database
+import com.example.myapplication.data.db.Database
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,8 +12,8 @@ import javax.inject.Singleton
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
 import androidx.room.Room
-import com.example.myapplication.DB.MovieDao
-import com.example.myapplication.Repository.MovieRepositroy
+import com.example.myapplication.data.db.MovieDao
+import com.example.myapplication.data.repository.MovieRepository
 import kotlin.jvm.java
 @Module
 @InstallIn(SingletonComponent::class)
@@ -23,7 +22,7 @@ object AppModule{
 
     @Provides
     @Singleton
-    fun provideMovieAPi(): ApiService {
+    fun provideMovieApi(): ApiService {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
@@ -33,7 +32,7 @@ object AppModule{
 
     @Provides
     @Singleton
-    fun provideDbMovie(
+    fun provideMovieDataBase(
         @ApplicationContext context: Context
     ): Database{
         return Room.databaseBuilder(
@@ -44,16 +43,17 @@ object AppModule{
     }
 
     @Provides
-    fun providMovieDao(database: Database): MovieDao{
+    fun provideMovieDao(database: Database): MovieDao{
         return database.movieDao()
     }
 
     @Provides
     @Singleton
-    fun providMovieRepo(
+    fun provideMovieRepository(
         api: ApiService,
-        movieDao: MovieDao): MovieRepositroy{
-        return MovieRepositroy(movieDao,api)
+        movieDao: MovieDao
+    ): MovieRepository {
+        return MovieRepository(movieDao, api)
     }
 
 }

@@ -1,0 +1,7 @@
+- [x] Fix Room crash by updating `MovieDao.kt`
+- [x] Refactor `AppNavigation.kt` to use JSON for movie details
+- [x] Update `MovieScreenShowAll.kt` to pass serialized movie data
+- [x] Update `MainActivity.kt` to use the new navigation structure
+- [x] Update `MovieDetailScreen.kt` to receive movie data and fix imports
+- [x] Update `MovieViewModel.kt` to handle null database results
+- [ ] Verify build and functionality
