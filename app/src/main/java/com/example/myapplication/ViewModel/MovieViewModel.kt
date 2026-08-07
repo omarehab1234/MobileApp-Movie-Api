@@ -51,14 +51,19 @@ class MovieViewModel @Inject constructor(
     private val _movie = MutableStateFlow<Movie?>(null)
     val movie = _movie.asStateFlow()
 
-    public fun setMovie(movie: Movie){
-        _movie.value = movie
-    }
     public fun getMovie(id: Int) {
         viewModelScope.launch {
+
             val dbMovie = movieRepo.getMovie(id)
+
             if (dbMovie != null) {
                 _movie.value = dbMovie
+                return@launch
+            }
+
+            val apiMovie: Movie = movieRepo.getMovieApi( id)
+            if(apiMovie != null) {
+                _movie.value = apiMovie
             }
         }
     }

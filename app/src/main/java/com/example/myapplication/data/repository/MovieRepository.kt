@@ -21,4 +21,7 @@ class MovieRepository @Inject constructor(
     suspend fun deleteMovie(movie: Movie) = movieDao.deleteMovie(movie)
 
     suspend fun  getMovie(movieId: Int) = movieDao.getMovie(movieId)
+
+    suspend fun  getMovieApi(movieId: Int): Movie = api.getMovieDetails(movieId, ApiKeyy.api_key)
+
 }

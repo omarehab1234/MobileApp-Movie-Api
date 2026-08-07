@@ -59,6 +59,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import androidx.navigation.NavHostController
 import com.example.myapplication.models.Movie
@@ -66,7 +67,8 @@ import com.example.myapplication.models.Movie
 @Composable
 fun MovieScreenShowALl(
     navController: NavController,
-    movies: List<Movie>
+    movies: List<Movie>,
+    viewModel: MovieViewModel = hiltViewModel()
 ) {
 
 
@@ -80,8 +82,7 @@ fun MovieScreenShowALl(
                             .fillMaxWidth()
                             .padding(12.dp)
                             .clickable {
-                                val movieJson = Uri.encode(Gson().toJson(movie))
-                                navController.navigate("details/$movieJson")
+                                navController.navigate("details/${movie.id}")
                             },
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(

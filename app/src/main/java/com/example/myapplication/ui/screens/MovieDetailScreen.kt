@@ -37,17 +37,13 @@ import androidx.compose.runtime.LaunchedEffect
 @Composable
 fun MovieDetailScreen (
     navController: NavHostController,
-    movieFromNav: Movie,
+    movieId: Int,
     viewModel: MovieViewModel = hiltViewModel()
 ){
-    LaunchedEffect(movieFromNav.id) {
-        viewModel.setMovie(movieFromNav)
-        viewModel.getMovie(movieFromNav.id)
+    LaunchedEffect(movieId) {
+        viewModel.getMovie(movieId)
     }
-
-    val movieState by viewModel.movie.collectAsState()
-    val movie = movieState ?: movieFromNav
-    
+    val movie by viewModel.movie.collectAsState()
     val listState = rememberLazyListState()
 
     val imageHeight = (450 - listState.firstVisibleItemScrollOffset / 4)
@@ -63,6 +59,7 @@ fun MovieDetailScreen (
             state = listState,
             modifier = Modifier.fillMaxSize()
         ) {
+            movie?.let { movie ->
             item {
                 AsyncImage(
                     model = "https://image.tmdb.org/t/p/w500${movie.poster_path}",
@@ -137,6 +134,7 @@ fun MovieDetailScreen (
             }
         }
 
+        }
         Button(
             onClick = { navController.popBackStack() },
             modifier = Modifier.padding(16.dp)

@@ -1,4 +1,5 @@
 package com.example.myapplication.Api
+import com.example.myapplication.models.Movie
 import  com.example.myapplication.models.MovieResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -17,5 +18,9 @@ suspend fun getFavoriteMovies(
     @Header("Authorization") token: String
     ):MovieResponse
 
-
+@GET("movie/{movie_id}")
+suspend fun getMovieDetails(
+    @Path("movie_id") movieId : Int,
+    @Query("api_key") apiKey: String,
+): Movie
 }

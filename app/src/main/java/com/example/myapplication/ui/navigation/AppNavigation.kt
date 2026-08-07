@@ -33,20 +33,19 @@ fun AppNavigation(
             MovieFavoriteScreen(navController)
         }
 
-        composable(
-            route = "details/{movieJson}",
+        composable( route = "details/{movieId}",
             arguments = listOf(
-                navArgument("movieJson") {
-                    type = NavType.StringType
+                navArgument("movieId") {
+                    type = NavType.IntType
                 }
             )
         ) { backStackEntry ->
-            val movieJson = backStackEntry.arguments?.getString("movieJson")
-            val movie = Gson().fromJson(movieJson, Movie::class.java)
+
+            val movieId = backStackEntry.arguments?.getInt("movieId") ?: 0
 
             MovieDetailScreen(
                 navController = navController,
-                movieFromNav = movie
+                movieId = movieId
             )
         }
     }
