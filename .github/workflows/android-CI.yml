@@ -21,7 +21,17 @@ jobs:
           cache: 'gradle'
       - name: do permission for the file
         run: chmod +x gradlew
+      - name: Create ApiKeyy
+        run: |
+            mkdir -p app/src/main/java/com/example/myapplication/Api
+            cat > app/src/main/java/com/example/myapplication/Api/ApiKeyy.kt <<EOF
+            package com.example.myapplication.Api
+
+            class ApiKeyy {
+                companion object {
+                    val api_key = "${{ secrets.api_key }}"
+                }
+            }
+            EOF
       - name: Build with Gradle
-        env:
-            api_key: ${{ secrets.TMDB_API_KEY }}
         run: ./gradlew assembleDebug
