@@ -22,4 +22,6 @@ jobs:
       - name: do permission for the file
         run: chmod +x gradlew
       - name: Build with Gradle
+        env:
+            api_key: ${{ secrets.TMDB_API_KEY }}
         run: ./gradlew assembleDebug
