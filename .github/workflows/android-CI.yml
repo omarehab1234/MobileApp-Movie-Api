@@ -1,4 +1,4 @@
-name: movie-android-CI
+name: android-CI
 
 on:
   push:
