@@ -86,16 +86,18 @@ class MovieWidget : GlanceAppWidget() {
                 }
             } else {
                 LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-                    items(movies) { movie ->
-                        MovieItem(movie)
+                    item {
+
+                        MovieItem(movies)
                     }
+
                 }
             }
         }
     }
 
     @Composable
-    private fun MovieItem(movie: Movie) {
+    private fun MovieItem(movies: List<Movie>) {
         Column(
             modifier = GlanceModifier
                 .fillMaxWidth()
@@ -104,38 +106,41 @@ class MovieWidget : GlanceAppWidget() {
                 .cornerRadius(16.dp)
                 .padding(12.dp)
         ) {
-            Text(
-                text = movie.title,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurface,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-            
-            Spacer(modifier = GlanceModifier.height(6.dp))
-            
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            movies.forEach {movie ->
+
                 Text(
-                    text = "⭐ ${movie.vote_average}",
+                    text = movie.title,
                     style = TextStyle(
-                        color = GlanceTheme.colors.primary,
-                        fontSize = 13.sp
+                        color = GlanceTheme.colors.onSurface,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 )
-                
-                Spacer(modifier = GlanceModifier.width(16.dp))
-                
-                Text(
-                    text = movie.release_date,
-                    style = TextStyle(
-                        color = GlanceTheme.colors.onSurfaceVariant,
-                        fontSize = 13.sp
+
+                Spacer(modifier = GlanceModifier.height(6.dp))
+
+                Row(
+                    modifier = GlanceModifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "⭐ ${movie.vote_average}",
+                        style = TextStyle(
+                            color = GlanceTheme.colors.primary,
+                            fontSize = 13.sp
+                        )
                     )
-                )
+
+                    Spacer(modifier = GlanceModifier.width(16.dp))
+
+                    Text(
+                        text = movie.release_date,
+                        style = TextStyle(
+                            color = GlanceTheme.colors.onSurfaceVariant,
+                            fontSize = 13.sp
+                        )
+                    )
+                }
             }
         }
     }

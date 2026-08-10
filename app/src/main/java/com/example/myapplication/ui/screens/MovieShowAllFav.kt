@@ -59,36 +59,82 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import androidx.navigation.NavHostController
+import com.example.myapplication.models.Movie
 
 @Composable
-fun MoviePopularScreen(
-    navController: NavHostController,
+fun MovieShowAllFav(
+    navController: NavController,
+    movies: List<Movie>,
     viewModel: MovieViewModel = hiltViewModel()
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
+
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
     ) {
+        movies?.let { movies ->
+            items(movies) { movie ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                        .clickable {
+                            navController.navigate("details/${movie.id}")
+                        },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF1E1E1E)
+                    ),
+                    elevation = CardDefaults.cardElevation(8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        AsyncImage(
+                            model = "https://image.tmdb.org/t/p/w500${movie.poster_path}",
+                            contentDescription = movie.title,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp),
 
-        Text(
-            text = "\n"
-        )
-        Button(
-            onClick = {
-                navController.navigate("favorite")
-            },
+                            contentScale = ContentScale.Crop
+                        )
 
-            modifier = Modifier.padding(16.dp)
-        )
-        {
-            Text(
-                text = "Your Favorite movie"
-            )
+                        Text(
+                            text = movie.title,
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "⭐ ${movie.vote_average}",
+                            color = Color.Yellow
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Release: ${movie.release_date}",
+                            color = Color.LightGray
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(
+                            text = movie.overview,
+                            color = Color.White,
+                            maxLines = 4,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
         }
-        MovieScreenShowALl(navController)
-
     }
 }

@@ -95,7 +95,7 @@ fun MovieFavoriteScreen(
         }
 
         movieResponse?.let {
-            MovieScreenShowALl(navController, it)
+            MovieShowAllFav(navController, it)
         }
         }
     }

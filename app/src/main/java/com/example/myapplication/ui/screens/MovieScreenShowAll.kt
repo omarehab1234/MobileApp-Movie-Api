@@ -1,9 +1,5 @@
 package com.example.myapplication.ui.screens
-import android.net.Uri
-import com.example.myapplication.ViewModel.MovieViewModel
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -12,23 +8,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.navigation.NavController
-import com.example.myapplication.data.db.MovieDao
-import dagger.hilt.android.AndroidEntryPoint
-import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Text
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -37,45 +28,53 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.google.gson.Gson
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.Text
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
-import androidx.navigation.NavHostController
+import coil.compose.AsyncImagePainter
+import com.example.myapplication.ViewModel.MovieViewModel
 import com.example.myapplication.models.Movie
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.LaunchedEffect
+
+sealed interface MovieState{
+        object Loading: MovieState
+        data class Success(
+            val movies : List<Movie>,
+            val isLoadingMore: Boolean = false
+            ): MovieState
+        data class Error(
+            val errorMessage: String
+        ): MovieState
+}
 
 @Composable
 fun MovieScreenShowALl(
     navController: NavController,
-    movies: List<Movie>,
     viewModel: MovieViewModel = hiltViewModel()
 ) {
+    val scrollState = rememberLazyListState()
+    val movieState by viewModel.movieState.collectAsState()
+    val fetchNextPage: Boolean by remember {
+        derivedStateOf {
+            val currentMovieCount = (movieState as? MovieState.Success)?.movies?.size
+                ?:0
+            val lastDisplayIndex = scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                ?:0
+            return@derivedStateOf lastDisplayIndex >= currentMovieCount - 3
+        }
+    }
 
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            movies?.let { movies ->
+    LaunchedEffect(fetchNextPage) {
+        if(fetchNextPage) viewModel.loadNextPage()
+    }
+    when(val state = movieState){
+        MovieState.Loading -> LoadingState()
+        is MovieState.Success ->{
+            val movies = state.movies
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = scrollState
+            ) {
                 items(movies) { movie ->
                     Card(
                         modifier = Modifier
@@ -99,7 +98,6 @@ fun MovieScreenShowALl(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(300.dp),
-
                                 contentScale = ContentScale.Crop
                             )
 
@@ -137,4 +135,15 @@ fun MovieScreenShowALl(
                 }
             }
         }
+        is MovieState.Error ->{
+            Text(
+                text = state.errorMessage
+            )
+        }
     }
+}
+
+@Composable
+fun LoadingState() {
+    CircularProgressIndicator()
+}

@@ -11,10 +11,14 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
+import androidx.core.app.NotificationCompat
 import androidx.room.Room
 import com.example.myapplication.data.db.MovieDao
 import com.example.myapplication.data.repository.MovieRepository
+import com.example.myapplication.notification.NotificationHelper
 import kotlin.jvm.java
+import android.app.NotificationChannel
+import android.app.NotificationManager
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule{
@@ -43,9 +47,20 @@ object AppModule{
     }
 
     @Provides
+    @Singleton
+    fun provideNotificationChannel(): NotificationChannel {
+        return NotificationChannel(
+            "movie_channel",
+            "Movie Notifications",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+    }
+
+    @Provides
     fun provideMovieDao(database: Database): MovieDao{
         return database.movieDao()
     }
+
 
     @Provides
     @Singleton

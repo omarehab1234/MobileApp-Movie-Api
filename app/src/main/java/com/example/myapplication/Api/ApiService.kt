@@ -9,6 +9,7 @@ interface ApiService {
 
 @GET("movie/popular")
 suspend fun getPopularMovies(
+    @Query("page") padeId: Int,
     @Query("api_key") apiKey: String,
     ):MovieResponse
 

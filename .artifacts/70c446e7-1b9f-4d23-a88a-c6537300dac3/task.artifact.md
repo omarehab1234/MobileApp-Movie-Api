@@ -1,4 +1,3 @@
-- [x] Fix `ColorProvider` errors using `GlanceTheme` in `MovieWidget.kt`
-- [x] Add corner radius and polish movie item layouts
-- [x] Improve spacing and empty state UI
-- [x] Verify build and functionality
+- [x] Create `ic_notification` drawable
+- [x] Fix `NotificationHelper.kt` compilation errors and Hilt warning
+- [x] Verify build

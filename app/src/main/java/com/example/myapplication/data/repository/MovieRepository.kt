@@ -10,7 +10,9 @@ class MovieRepository @Inject constructor(
     private val movieDao : MovieDao,
     private val api : ApiService
 ){
-    suspend fun getPopularMovies() = api.getPopularMovies(ApiKeyy.api_key)
+    suspend fun getPopularMovies(pageId: Int = 1) = api.getPopularMovies(
+                                                        padeId = pageId,
+                                                        apiKey = ApiKeyy.api_key)
 
     suspend fun addFavMovie(movie: Movie) = movieDao.insertMovie(movie)
 

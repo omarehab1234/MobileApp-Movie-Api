@@ -1,25 +1,22 @@
-# Fix Glance ColorProvider Error and Enhance Widget UI
+# Implementation Plan - Fix Missing Notifications (Requesting Runtime Permission)
 
-The current `MovieWidget.kt` has a "library group" error because `ColorProvider(Color)` is an internal API in Jetpack Glance 1.1.1. The public alternative is to use `ColorProvider(day, night)` or, more ideally, the `GlanceTheme` system. Additionally, the user wants the widget to look better.
+The notifications are likely not appearing because the app is targeting Android 13+ (API 33+) but is not requesting the mandatory `POST_NOTIFICATIONS` runtime permission. Without this permission, the system blocks all notifications from the app.
 
 ## Proposed Changes
 
-### Widget UI & Theming
+### Main Activity
 
-#### [MODIFY] [MovieWidget.kt](file:///C:/Users/ALSAAD NASR CITY/AndroidStudioProjects/MyApplication/app/src/main/java/com/example/myapplication/widget/MovieWidget.kt)
-- **Fix ColorProvider Errors**:
-    - Use `GlanceTheme` to wrap the widget content.
-    - Replace direct `ColorProvider(Color)` calls with theme-based colors (e.g., `GlanceTheme.colors.background`, `GlanceTheme.colors.surface`).
-    - Use `ColorProvider(day = ..., night = ...)` for custom colors like the rating star.
-- **Enhance Layout**:
-    - Add `cornerRadius` to movie items to give them a modern "card" look.
-    - Improve spacing and alignment.
-    - Add a title bar or header for better branding.
+#### [MODIFY] [MainActivity.kt](file:///C:/Users/ALSAAD NASR CITY/AndroidStudioProjects/MyApplication/app/src/main/java/com/example/myapplication/MainActivity.kt)
+- Integrate `com.google.accompanist.permissions` to handle the `POST_NOTIFICATIONS` permission request.
+- Add a `LaunchedEffect` to request the permission when the app starts if the device is running Android 13 or higher.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `./gradlew assembleDebug` to ensure all compilation errors are resolved.
+- Run `./gradlew :app:assembleDebug` to ensure the project builds with the new permission logic.
 
 ### Manual Verification
-- Deploy to device and verify the widget looks modern and uses the correct theme colors (respecting dark/light mode if applicable).
+- Deploy the app to a device running Android 13 or higher.
+- Observe the system permission dialog on startup.
+- Grant the permission.
+- Add a movie to favorites and verify that the notification now appears in the notification bar.
