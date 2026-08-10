@@ -4,7 +4,7 @@ name: test-for-mobile
 
 on:
   workflow_run:
-    workflows: ["android-CI"]
+    workflows: ["movie-android-CI"]
     types:
       - completed
 
