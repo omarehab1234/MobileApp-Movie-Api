@@ -4,7 +4,7 @@ name: test-for-mobile
 
 on:
   workflow_run:
-    workflows: ["movie-android-CI"]
+    workflows: ["android-CI"]
     types:
       - completed
 
@@ -30,6 +30,6 @@ jobs:
       - name: Add permission for Gradle
         run: chmod +x gradlew
 
-      - name: Run tests
+      - name: Run Unit tests
         run: ./gradlew test
       
