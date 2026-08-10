@@ -29,6 +29,18 @@ jobs:
 
       - name: Add permission for Gradle
         run: chmod +x gradlew
+      - name: Create ApiKeyy
+        run: |
+            mkdir -p app/src/main/java/com/example/myapplication/Api
+            cat > app/src/main/java/com/example/myapplication/Api/ApiKeyy.kt <<EOF
+            package com.example.myapplication.Api
+
+            class ApiKeyy {
+                companion object {
+                    val api_key = "${{ secrets.api_key }}"
+                }
+            }
+            EOF
 
       - name: Run Unit tests
         run: ./gradlew test
